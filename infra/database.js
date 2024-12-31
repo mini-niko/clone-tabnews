@@ -11,12 +11,11 @@ async function query(queryObject, params = []) {
 
   try {
     await client.connect();
-
     const result = await client.query(queryObject, params);
-
     return result;
   } catch (err) {
     console.error(err);
+    throw err;
   } finally {
     await client.end();
   }
