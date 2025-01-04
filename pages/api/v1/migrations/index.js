@@ -3,6 +3,10 @@ import { join } from "node:path";
 import database from "infra/database.js";
 
 async function migrations(req, res) {
+  const acceptedMethods = ["GET", "POST"];
+
+  if (!acceptedMethods.includes(req.method)) return res.status(405).end();
+
   const dbClient = await database.getNewClient();
 
   const migrationRunnerOptions = {
@@ -37,9 +41,7 @@ async function migrations(req, res) {
   };
 
   const toExecute = execute[req.method];
-
-  if (!toExecute) return res.status(405).end();
-  else toExecute();
+  toExecute();
 }
 
 export default migrations;

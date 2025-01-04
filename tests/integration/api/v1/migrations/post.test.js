@@ -1,4 +1,5 @@
 import database from "infra/database.js";
+import { get } from "node:https";
 
 beforeAll(cleanDatabase);
 
@@ -21,7 +22,7 @@ test("POST to /api/v1/migrations should return 200", async () => {
 
 test("POST to /api/v1/migrations again should return 201", async () => {
   const getResponse = await fetch("http://localhost:3000/api/v1/migrations", {
-    method: "POST"
+    method: "POST",
   });
 
   expect(getResponse.status).toBe(200);
@@ -30,4 +31,12 @@ test("POST to /api/v1/migrations again should return 201", async () => {
 
   expect(Array.isArray(getResponseBody)).toBe(true);
   expect(getResponseBody.length).toBe(0);
+});
+
+test("Invalid method to /api/v1/migrations again should return 405", async () => {
+  const getResponse = await fetch("http://localhost:3000/api/v1/migrations", {
+    method: "PUT",
+  });
+
+  expect(getResponse.status).toBe(405);
 });
