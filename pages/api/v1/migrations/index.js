@@ -24,15 +24,12 @@ async function migrations(req, res) {
         dryRun: true,
       });
 
-      await dbClient.end();
-
       res.status(200).json(pendingMigrations);
     },
     async POST() {
       const migratedMigrations = await migrationRunner({
         ...migrationRunnerOptions,
       });
-      await dbClient.end();
 
       const method = migratedMigrations.length === 0 ? 200 : 201;
 
@@ -41,7 +38,14 @@ async function migrations(req, res) {
   };
 
   const toExecute = execute[req.method];
-  toExecute();
+
+  try {
+    await toExecute();
+  } catch (err) {
+    throw err;
+  } finally {
+    await dbClient.end();
+  }
 }
 
 export default migrations;
