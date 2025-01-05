@@ -1,5 +1,6 @@
 const { exec } = require("node:child_process");
 const { clear } = require("node:console");
+const { loadingFunc } = require("./loading");
 
 function checkPostgres() {
   exec("docker exec postgres-dev pg_isready --host localhost", handleReturn);
@@ -11,20 +12,11 @@ function checkPostgres() {
     }
     clearInterval(loading);
     process.stdout.write("\r");
-    console.log("🟢 Postgres está aceitando conexões");
+    console.log("🟢 Postgres está aceitando conexões\n");
   }
 }
 
-process.stdout.write("🔴 Aguardando por Postgres");
+console.log("");
 checkPostgres();
 
-const loading = (() => {
-  const loadingArray = ["\\", "|", "/", "⎯"];
-  let i = 0;
-
-  return setInterval(() => {
-    process.stdout.write(
-      `\r🔴 Aguardando por Postgres... ${loadingArray[i++ % loadingArray.length]} `,
-    );
-  }, 100);
-})();
+const loading = loadingFunc();
