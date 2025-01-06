@@ -4,7 +4,7 @@
   "description": "Repositório de estudos do [curso.dev](https://curso.dev/)",
   "main": "index.js",
   "scripts": {
-    "test": "npm run services:up && concurrently -n next,jest --hide next -k ---success command-jest \"next dev\" \"jest --runInBand --verbose\"",
+    "test": "npm run services:up && node infra/scripts/wait-for-postgres.js && concurrently -n next,jest --hide next -k ---success command-jest 'next dev' 'jest --runInBand'",
     "test:watch": "jest --runInBand --watchAll",
     "dev": "npm run services:up && npm run wait-for-postgres && npm run migration:up && next dev",
     "lint:check": "prettier --check .",
