@@ -18,7 +18,7 @@ test("GET to /api/v1/status should return 200", async () => {
   const databaseInfo = body.dependecies.database;
 
   expect(databaseInfo.status).toBe("healthy");
-  expect(databaseInfo.version).toBe("20.0");
+  expect(databaseInfo.version).toBe("16.0");
   expect(databaseInfo.max_connections).toBe(100);
   expect(databaseInfo.open_connections).toBe(1);
 });
