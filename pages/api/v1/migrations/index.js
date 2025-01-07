@@ -42,6 +42,7 @@ async function migrations(req, res) {
   try {
     await toExecute();
   } catch (err) {
+    console.log(err);
     throw err;
   } finally {
     await dbClient.end();
