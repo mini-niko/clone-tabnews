@@ -1,5 +1,4 @@
 const { exec } = require("node:child_process");
-const { clear } = require("node:console");
 const { loadingFunc } = require("./loading");
 
 function checkPostgres() {
