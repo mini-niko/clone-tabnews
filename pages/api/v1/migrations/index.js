@@ -1,6 +1,7 @@
 import migrationRunner from "node-pg-migrate";
 import { join } from "node:path";
 import database from "infra/database.js";
+import { readdirSync } from "fs";
 
 async function migrations(req, res) {
   const acceptedMethods = ["GET", "POST"];
@@ -8,6 +9,10 @@ async function migrations(req, res) {
   if (!acceptedMethods.includes(req.method)) return res.status(405).end();
 
   const dbClient = await database.getNewClient();
+
+  console.log(
+    `\n${join("infra/migrations")}\n\n${readdirSync(join("infra", "migrations"))}`,
+  );
 
   const migrationRunnerOptions = {
     dbClient: dbClient,
