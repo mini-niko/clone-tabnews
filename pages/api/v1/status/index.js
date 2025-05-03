@@ -4,19 +4,19 @@ import { InternalServerError } from "infra/errors";
 async function status(req, res) {
   try {
     const updatedAt = new Date().toISOString();
-  
+
     const queryVersion = await database.query(`SHOW server_version;`);
     const version = queryVersion.rows[0].server_version;
-  
+
     const queryMaxConnections = await database.query("SHOW max_connections;");
     const maxConnections = queryMaxConnections.rows[0].max_connections;
-  
+
     const queryOpenConnections = await database.query(
       `SELECT count(*)::int FROM pg_stat_activity WHERE datname = $1;`,
       [process.env.POSTGRES_DB],
     );
     const openConnections = queryOpenConnections.rows[0].count;
-  
+
     res.status(200).json({
       updated_at: updatedAt,
       dependecies: {
@@ -28,13 +28,13 @@ async function status(req, res) {
         },
       },
     });
-  } catch(err) {
-    console.log(err)
+  } catch (err) {
+    console.log(err);
     const publicErrorObject = new InternalServerError({
-      cause: err
+      cause: err,
     });
-    console.error(publicErrorObject)
-    return res.status(500).json(publicErrorObject.toJSON())
+    console.error(publicErrorObject);
+    return res.status(500).json(publicErrorObject.toJSON());
   }
 }
 
