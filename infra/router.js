@@ -35,12 +35,13 @@ function onNoMatchHandler(req, res) {
 }
 
 function onErrorHandler(error, req, res) {
-  console.log(error);
-
   const publicErrorObject = new InternalServerError({
     cause: error,
+    statusCode: error.statusCode,
   });
 
   console.error(publicErrorObject);
-  return res.status(500).json(publicErrorObject.toJSON());
+  return res
+    .status(publicErrorObject.statusCode)
+    .json(publicErrorObject.toJSON());
 }
