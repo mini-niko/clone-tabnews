@@ -1,52 +1,45 @@
 import migrationRunner from "node-pg-migrate";
 import { resolve } from "node:path";
 import database from "infra/database.js";
+import createCustomRouter from "infra/router";
 
-async function migrations(req, res) {
-  const acceptedMethods = ["GET", "POST"];
+export default createCustomRouter({
+  getHandler,
+  postHandler,
+});
 
-  if (!acceptedMethods.includes(req.method)) return res.status(405).end();
+const migrationRunnerOptions = {
+  dir: resolve(process.cwd(), "infra", "migrations"),
+  direction: "up",
+  verbose: true,
+  migrationsTable: "pgmigrations",
+};
 
+async function getHandler(req, res) {
   const dbClient = await database.getNewClient();
 
-  const migrationRunnerOptions = {
-    dbClient: dbClient,
-    dir: resolve(process.cwd(), "infra", "migrations"),
-    direction: "up",
-    verbose: true,
-    migrationsTable: "pgmigrations",
-  };
+  const pendingMigrations = await migrationRunner({
+    ...migrationRunnerOptions,
+    dbClient,
+    dryRun: true,
+  });
 
-  const execute = {
-    async GET() {
-      const pendingMigrations = await migrationRunner({
-        ...migrationRunnerOptions,
-        dryRun: true,
-      });
+  await dbClient.end();
 
-      res.status(200).json(pendingMigrations);
-    },
-    async POST() {
-      const migratedMigrations = await migrationRunner({
-        ...migrationRunnerOptions,
-      });
-
-      const method = migratedMigrations.length === 0 ? 200 : 201;
-
-      res.status(method).json(migratedMigrations);
-    },
-  };
-
-  const toExecute = execute[req.method];
-
-  try {
-    await toExecute();
-  } catch (err) {
-    console.log(err);
-    throw err;
-  } finally {
-    await dbClient.end();
-  }
+  res.status(200).json(pendingMigrations);
 }
 
-export default migrations;
+async function postHandler(req, res) {
+  const dbClient = await database.getNewClient();
+
+  const migratedMigrations = await migrationRunner({
+    ...migrationRunnerOptions,
+    dbClient,
+  });
+
+  await dbClient.end();
+
+  const method = migratedMigrations.length === 0 ? 200 : 201;
+
+  res.status(method).json(migratedMigrations);
+}
