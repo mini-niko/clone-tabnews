@@ -1,4 +1,5 @@
 import { Client } from "pg";
+import { ServiceError } from "./errors";
 
 async function query(queryObject, params = []) {
   let client;
@@ -8,8 +9,11 @@ async function query(queryObject, params = []) {
     const result = await client.query(queryObject, params);
     return result;
   } catch (err) {
-    console.error(err);
-    throw err;
+    const serviceErrorObj = new ServiceError({
+      message: "Erro na conexão com o Postgres ou na query.",
+      cause: err,
+    });
+    throw serviceErrorObj;
   } finally {
     await client?.end();
   }
