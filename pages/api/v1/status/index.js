@@ -1,41 +1,34 @@
 import database from "infra/database.js";
-import { InternalServerError } from "infra/errors";
+import createCustomRouter from "infra/router";
 
-async function status(req, res) {
-  try {
-    const updatedAt = new Date().toISOString();
+export default createCustomRouter({
+  getHandler,
+});
 
-    const queryVersion = await database.query(`SHOW server_version;`);
-    const version = queryVersion.rows[0].server_version;
+async function getHandler(req, res) {
+  const updatedAt = new Date().toISOString();
 
-    const queryMaxConnections = await database.query("SHOW max_connections;");
-    const maxConnections = queryMaxConnections.rows[0].max_connections;
+  const queryVersion = await database.query(`SHOW server_version;`);
+  const version = queryVersion.rows[0].server_version;
 
-    const queryOpenConnections = await database.query(
-      `SELECT count(*)::int FROM pg_stat_activity WHERE datname = $1;`,
-      [process.env.POSTGRES_DB],
-    );
-    const openConnections = queryOpenConnections.rows[0].count;
+  const queryMaxConnections = await database.query("SHOW max_connections;");
+  const maxConnections = queryMaxConnections.rows[0].max_connections;
 
-    res.status(200).json({
-      updated_at: updatedAt,
-      dependecies: {
-        database: {
-          status: "healthy",
-          max_connections: parseInt(maxConnections),
-          open_connections: openConnections,
-          version,
-        },
+  const queryOpenConnections = await database.query(
+    `SELECT count(*)::int FROM pg_stat_activity WHERE datname = $1;`,
+    [process.env.POSTGRES_DB],
+  );
+  const openConnections = queryOpenConnections.rows[0].count;
+
+  res.status(200).json({
+    updated_at: updatedAt,
+    dependecies: {
+      database: {
+        status: "healthy",
+        max_connections: parseInt(maxConnections),
+        open_connections: openConnections,
+        version,
       },
-    });
-  } catch (err) {
-    console.log(err);
-    const publicErrorObject = new InternalServerError({
-      cause: err,
-    });
-    console.error(publicErrorObject);
-    return res.status(500).json(publicErrorObject.toJSON());
-  }
+    },
+  });
 }
-
-export default status;
