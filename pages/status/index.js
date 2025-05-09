@@ -25,26 +25,28 @@ function UpdatedAt() {
   let updatedAtText = "Carregando...";
 
   if (!isLoading && data) {
-    updatedAtText = new Date(data.updated_at).toLocaleString("pt-BR");
+    updatedAtText = new Date(data?.updated_at).toLocaleString("pt-BR");
+
+    return (
+      <>
+        <p>Última atualização: {updatedAtText}</p>
+        <div>
+          <h3>Banco de dados:</h3>
+          <p>
+            Status: {data.dependecies.database.status}
+            <br />
+            Versão: {data.dependecies.database.version}
+            <br />
+            Quantidade de conexões máximas:{" "}
+            {data.dependecies.database.max_connections}
+            <br />
+            Quantidade de conexões abertas:{" "}
+            {data.dependecies.database.open_connections}
+          </p>
+        </div>
+      </>
+    );
   }
 
-  return (
-    <>
-      <p>Última atualização: {updatedAtText}</p>
-      <div>
-        <h3>Banco de dados:</h3>
-        <p>
-          Status: {data.dependecies.database.status}
-          <br />
-          Versão: {data.dependecies.database.version}
-          <br />
-          Quantidade de conexões máximas:{" "}
-          {data.dependecies.database.max_connections}
-          <br />
-          Quantidade de conexões abertas:{" "}
-          {data.dependecies.database.open_connections}
-        </p>
-      </div>
-    </>
-  );
+  return updatedAtText;
 }
