@@ -1,4 +1,3 @@
-import database from "infra/database.js";
 import createCustomRouter from "infra/router";
 import migrator from "infra/migrator";
 
