@@ -5,8 +5,8 @@ import { resolve } from "node:path";
 const migrationRunnerOptions = {
   dir: resolve(process.cwd(), "infra", "migrations"),
   direction: "up",
-  verbose: true,
   migrationsTable: "pgmigrations",
+  log: () => {},
 };
 
 async function listPendingMigrations() {
