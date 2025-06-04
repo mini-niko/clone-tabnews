@@ -44,7 +44,7 @@ export class ServiceError extends Error {
     });
 
     this.name = "ServiceError";
-    this.message = "Verifique se o serviço está disponível.";
+    this.message = message || "Verifique se o serviço está disponível.";
     this.statusCode = 503;
   }
 
