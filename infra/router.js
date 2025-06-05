@@ -1,5 +1,9 @@
 import { createRouter } from "next-connect";
-import { InternalServerError, MethodNotAllowedError } from "./errors";
+import {
+  InternalServerError,
+  MethodNotAllowedError,
+  ValidationError,
+} from "./errors";
 
 export default function createCustomRouter({
   getHandler,
@@ -35,13 +39,16 @@ function onNoMatchHandler(req, res) {
 }
 
 function onErrorHandler(error, req, res) {
+  if (error instanceof ValidationError) {
+    return res.status(error.statusCode).json(error);
+  }
+
   const publicErrorObject = new InternalServerError({
     cause: error,
     statusCode: error.statusCode,
   });
 
   console.error(publicErrorObject);
-  return res
-    .status(publicErrorObject.statusCode)
-    .json(publicErrorObject.toJSON());
+
+  return res.status(publicErrorObject.statusCode).json(publicErrorObject);
 }
