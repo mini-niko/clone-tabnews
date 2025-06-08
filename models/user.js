@@ -1,5 +1,5 @@
 import database from "infra/database";
-import { ValidationError } from "infra/errors";
+import { NotFoundError, ValidationError } from "infra/errors";
 
 async function create(userInputData) {
   await validateUniqueUsername(userInputData.username);
@@ -27,8 +27,6 @@ async function create(userInputData) {
         action: "Utilize outro nome de usuário para realizar o cadastro.",
       });
     }
-
-    return results.rows[0];
   }
 
   async function validateUniqueEmail(email) {
@@ -50,8 +48,6 @@ async function create(userInputData) {
         action: "Utilize outro email para realizar o cadastro.",
       });
     }
-
-    return results.rows[0];
   }
 
   async function runInsertQuery(userInputData) {
@@ -71,4 +67,37 @@ async function create(userInputData) {
   }
 }
 
-export default { create };
+async function findOneByUsername(username) {
+  const userFound = await runSelectQuery(username);
+
+  return userFound;
+
+  async function runSelectQuery(username) {
+    const results = await database.query(
+      `
+      SELECT
+        * 
+      FROM
+        users
+      WHERE
+        LOWER(username) = LOWER($1)
+      LIMIT
+        1
+      ;`,
+      [username],
+    );
+
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        name: "NotFoundError",
+        message: "O username informado não foi encontrador no sistema.",
+        action: "Verifique se o username está digitado corretamente.",
+        status_code: 404,
+      });
+    }
+
+    return results.rows[0];
+  }
+}
+
+export default { create, findOneByUsername };
