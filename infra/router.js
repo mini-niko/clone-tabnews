@@ -10,6 +10,7 @@ export default function createCustomRouter({
   getHandler,
   postHandler,
   putHandler,
+  patchHandler,
   deleteHandler,
 }) {
   const router = createRouter();
@@ -25,6 +26,9 @@ export default function createCustomRouter({
   }
   if (deleteHandler) {
     router.delete(deleteHandler);
+  }
+  if (patchHandler) {
+    router.patch(patchHandler);
   }
 
   return router.handler({
