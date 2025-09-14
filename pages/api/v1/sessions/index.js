@@ -1,7 +1,7 @@
 import createCustomRouter from "infra/router.js";
+import controller from "infra/controller";
 import authentication from "models/authentication.js";
 import session from "models/session.js";
-import * as cookie from "cookie";
 
 export default createCustomRouter({
   postHandler,
@@ -17,14 +17,7 @@ async function postHandler(req, res) {
 
   const newSession = await session.create(authenticatedUser.id);
 
-  const setCookie = cookie.serialize(`session_id`, newSession.token, {
-    path: "/",
-    maxAge: session.EXPIRATION_IN_MILISSECONDS / 1000,
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-  });
-
-  res.setHeader("Set-Cookie", setCookie);
+  controller.setSessionCookie(newSession.token, res);
 
   res.status(201).json(newSession);
 }
