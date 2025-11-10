@@ -2,28 +2,36 @@ import database from "infra/database";
 import password from "models/password.js";
 import { NotFoundError, ValidationError } from "infra/errors";
 
-async function create(userInputData) {
-  await validateUniqueUsername(userInputData.username);
-  await validateUniqueEmail(userInputData.email);
-  await hashPasswordInObject(userInputData);
+async function findOneById(userId) {
+  const userFound = await runSelectQuery(userId);
 
-  const newUser = await runInsertQuery(userInputData);
-  return newUser;
+  return userFound;
 
-  async function runInsertQuery(userInputData) {
-    const result = await database.query(
+  async function runSelectQuery(userId) {
+    const results = await database.query(
       `
-      INSERT INTO 
-        users (username, email, password) 
-      VALUES 
-        ( $1, $2, $3 )
-      RETURNING
-        *
+      SELECT
+        * 
+      FROM
+        users
+      WHERE
+        id = $1
+      LIMIT
+        1
       ;`,
-      [userInputData.username, userInputData.email, userInputData.password],
+      [userId],
     );
 
-    return result.rows[0];
+    if (results.rowCount === 0) {
+      throw new NotFoundError({
+        name: "NotFoundError",
+        message: "O id informado não foi encontrador no sistema.",
+        action: "Verifique se o id está digitado corretamente.",
+        status_code: 404,
+      });
+    }
+
+    return results.rows[0];
   }
 }
 
@@ -90,6 +98,31 @@ async function findOneByEmail(email) {
     }
 
     return results.rows[0];
+  }
+}
+
+async function create(userInputData) {
+  await validateUniqueUsername(userInputData.username);
+  await validateUniqueEmail(userInputData.email);
+  await hashPasswordInObject(userInputData);
+
+  const newUser = await runInsertQuery(userInputData);
+  return newUser;
+
+  async function runInsertQuery(userInputData) {
+    const result = await database.query(
+      `
+      INSERT INTO 
+        users (username, email, password) 
+      VALUES 
+        ( $1, $2, $3 )
+      RETURNING
+        *
+      ;`,
+      [userInputData.username, userInputData.email, userInputData.password],
+    );
+
+    return result.rows[0];
   }
 }
 
@@ -187,6 +220,12 @@ async function hashPasswordInObject(userInputData) {
   userInputData.password = hashedPassword;
 }
 
-const user = { create, findOneByUsername, findOneByEmail, update };
+const user = {
+  create,
+  findOneById,
+  findOneByUsername,
+  findOneByEmail,
+  update,
+};
 
 export default user;
