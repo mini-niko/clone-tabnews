@@ -10,7 +10,7 @@ beforeAll(async () => {
 });
 
 describe("GET /api/v1/user", () => {
-  describe("Authenticated  user", () => {
+  describe("Authenticated user", () => {
     test("With valid session", async () => {
       const createdUser = await orchestrator.createUser({
         username: "UserWithValidSession",
@@ -25,6 +25,12 @@ describe("GET /api/v1/user", () => {
       });
 
       expect(response.status).toBe(200);
+
+      const cacheControl = response.headers.get("Cache-Control");
+
+      expect(cacheControl).toBe(
+        "no-store, no-cache, max-age=0, must-revalidate",
+      );
 
       const body = await response.json();
 
